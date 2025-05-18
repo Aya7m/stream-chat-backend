@@ -14,40 +14,52 @@ export class BoardsService {
         if (!user) {
             throw new Error('User not found');
         }
-        if (!user.fullname || !user.email || !user.password !|| !user.nativeLanguage || !user.learningLanguage || !user.location || !user.profilePic) {
-            throw new Error('All fields are required');
-        }
-
-        
+        // if (!user.fullname || !user.email || !user.password! || !user.nativeLanguage || !user.learningLanguage || !user.location || !user.profilePic) {
+        //     throw new Error('All fields are required');
+        // }
 
 
 
 
-        const updatedUser = await this.userModel.findByIdAndUpdate(userId, { fullname, bio, nativeLanguage, learningLanguage, location, profilePic, isOnboarded: true }, { new: true });
 
+
+        const updatedUser = await this.userModel.findByIdAndUpdate(userId,{
+            fullname: fullname,
+            bio: bio,
+            nativeLanguage: nativeLanguage,
+            learningLanguage: learningLanguage,
+            location: location,
+            profilePic: profilePic,
+            isOnboarded: true
+        }, { new: true  });
         if (!updatedUser) {
             throw new Error('User not found');
         }
 
-       
-
+        // Call the function to upsert the user in Stream
         try {
             await upsertStreamUser({
                 id: updatedUser._id.toString(),
-                fullname: updatedUser.fullname,
-                email: updatedUser.email,
-                image: updatedUser.profilePic,
-                bio: updatedUser.bio,
-                nativeLanguage: updatedUser.nativeLanguage,
-                learningLanguage: updatedUser.learningLanguage,
-                location: updatedUser.location,
+                name: updatedUser.fullname,
+                image:updatedUser.profilePic || "",
+                
+                
             });
-            console.log(`User updated successfully ${updatedUser._id}`);
-
+            console.log(`User upserted in Stream successfully: ${updatedUser._id}`);
         } catch (error) {
-            console.log(error);
+            console.error('Error upserting user in Stream:', error);
+            throw new Error('Failed to upsert user in Stream');
         }
+
         return updatedUser;
+      
+      
+       
+
+
+
+      
+
     }
 
 
