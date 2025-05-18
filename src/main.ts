@@ -1,22 +1,4 @@
-// import { NestFactory } from '@nestjs/core';
-// import { AppModule } from './app.module';
-// import * as cookieParser from 'cookie-parser';
-// import * as dotenv from 'dotenv';
-// dotenv.config();
 
-// async function bootstrap() {
-//   const app = await NestFactory.create(AppModule);
-//   app.use(cookieParser());
-
-//   app.enableCors({
-//     origin: 'http://localhost:5173', // رابط الفرونت إند
-//     credentials: true,
-
-
-//   });
-//   await app.listen(process.env.PORT ?? 5000);
-// }
-// bootstrap();
 
 
 
@@ -41,10 +23,12 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // إعداد CORS بناءً على البيئة
-  app.enableCors({
-    origin: process.env.NODE_ENV === 'production' ? process.env.CLIENT_URL : 'http://localhost:5173',
-    credentials: true,
-  });
+app.enableCors({
+  origin: process.env.NODE_ENV === 'production'
+    ? ['https://stream-frontend-gllrovn08-ayas-projects-ecef4715.vercel.app', process.env.CLIENT_URL]
+    : ['http://localhost:5173'],
+  credentials: true,
+});
 
 
   // Serve React build
