@@ -202,17 +202,24 @@ export class UserControllerService {
 
 
   async getMyRequests(userId: string) {
-    const incomingRequests = await this.frendRequestModel.find({
-      receiver: new Types.ObjectId(userId), status: 'pending'
-    }).populate('sender', 'fullname nativeLanguage learningLanguage profilePic');
+    try {
+      const incomingRequests = await this.frendRequestModel.find({
+        receiver: new Types.ObjectId(userId), status: 'pending'
+      }).populate('sender', 'fullname nativeLanguage learningLanguage profilePic');
 
-    const outgoingRequests = await this.frendRequestModel.find({
-      sender: new Types.ObjectId(userId), status: 'accepted'
-    }).populate('receiver', 'fullname nativeLanguage learningLanguage profilePic');
-    return {
-      incomingRequests,
-      outgoingRequests
-    };
+      const outgoingRequests = await this.frendRequestModel.find({
+        sender: new Types.ObjectId(userId), status: 'accepted'
+      }).populate('receiver', 'fullname nativeLanguage learningLanguage profilePic');
+      return {
+        incomingRequests,
+        outgoingRequests
+      }
+
+    } catch (error) {
+      console.error('Error in getMyRequests:', error.message);
+      throw new Error('Something went wrong');
+
+    }
 
   }
 
