@@ -129,23 +129,39 @@ export class UserControllerService {
 
   // accept request
   async acceptRequest(userId: string, requestId: string) {
+
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new Error('User not found');
     }
+
     const request = await this.frendRequestModel.findById(requestId);
     if (!request) {
       throw new Error('Request not found');
     }
-    if (request.receiver.toString() !== userId) {
-      throw new Error('You are not the receiver of this request');
+
+    if (request.receiver.toString() !== user._id.toString()) {
+      throw new Error('You are not authorized to accept this request');
     }
+
+    // update the request status to accepted
     request.status = 'accepted';
-    //   add each user to the other's friend array
-    await this.userModel.findByIdAndUpdate(request.sender, { $addToSet: { friends: request.receiver } });
-    await this.userModel.findByIdAndUpdate(request.receiver, { $addToSet: { friends: request.sender } });
-    const savedRequest = await request.save();
-    return savedRequest;
+    await request.save();
+
+    // added each other to friends array
+    await this.userModel.findByIdAndUpdate(user._id, {
+      $addToSet: { friends: request.sender }
+    });
+
+    await this.userModel.findByIdAndUpdate(request.sender, {
+      $addToSet: { friends: user._id }
+    });
+
+    // return the updated request
+    const updatedRequest = await this.frendRequestModel.findById(requestId);
+    return updatedRequest;
+
+
 
   }
 
@@ -181,25 +197,18 @@ export class UserControllerService {
 
 
   async getMyRequests(userId: string) {
-    const user = await this.userModel.findById(userId);
-    if (!user) {
-      throw new Error('User not found');
-    }
-
     const incomingRequests = await this.frendRequestModel.find({
-      receiver: new Types.ObjectId(userId),
-      status: 'pending'
+      receiver: new Types.ObjectId(userId), status: 'pending'
     }).populate('sender', 'fullname nativeLanguage learningLanguage profilePic');
 
     const outgoingRequests = await this.frendRequestModel.find({
-      sender: new Types.ObjectId(userId),
-      status: 'pending' // ← هنا التعديل
+      sender: new Types.ObjectId(userId), status: 'accepted'
     }).populate('receiver', 'fullname nativeLanguage learningLanguage profilePic');
-
     return {
       incomingRequests,
       outgoingRequests
     };
+
   }
 
 
@@ -207,10 +216,20 @@ export class UserControllerService {
 
   // get outGoingFiendsRequests
   async getOutGoingFiendsRequests(userId: string) {
-    const outgoingRequests = await this.frendRequestModel.find({
-      sender: userId, status: 'pending'
-    }).populate('receiver', 'fullname nativeLanguage learningLanguage profilePic');
-    return outgoingRequests;
+    try {
+
+      const outgoingRequests = await this.frendRequestModel.find({
+        sender: new Types.ObjectId(userId),
+        status: 'pending'
+      }).populate('receiver', 'fullname nativeLanguage learningLanguage profilePic');
+
+      return outgoingRequests;
+      
+    } catch (error) {
+      console.error('Error in getOutGoingFiendsRequests:', error.message);
+      throw new Error('Something went wrong');
+      
+    }
   }
 
 }
