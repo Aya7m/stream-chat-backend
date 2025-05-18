@@ -208,7 +208,7 @@ export class UserControllerService {
       }).populate('sender', 'fullname nativeLanguage learningLanguage profilePic');
 
       const outgoingRequests = await this.frendRequestModel.find({
-        sender: new Types.ObjectId(userId),  status: 'pending'
+        sender: new Types.ObjectId(userId), status: 'accepted'
       }).populate('receiver', 'fullname nativeLanguage learningLanguage profilePic');
       return {
         incomingRequests,
