@@ -92,10 +92,15 @@ export class UserControllerService {
       throw new Error('Receiver not found');
     }
 
+    // Check if already friends
+    if (receiver.friends.some(id => id.equals(senderId))) {
+      throw new Error('You are already friends with this user');
+    }
+
 
 
     // Check if the request already frinds
-    if (receiver.friends.includes(senderId)) {
+    if (receiver.friends.map(id => id.toString()).includes(senderId.toString())) {
       throw new Error('You are already friends with this user');
     }
 
@@ -224,11 +229,11 @@ export class UserControllerService {
       }).populate('receiver', 'fullname nativeLanguage learningLanguage profilePic');
 
       return outgoingRequests;
-      
+
     } catch (error) {
       console.error('Error in getOutGoingFiendsRequests:', error.message);
       throw new Error('Something went wrong');
-      
+
     }
   }
 
