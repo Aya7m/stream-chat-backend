@@ -14,7 +14,7 @@ export class BoardsService {
         if (!user) {
             throw new Error('User not found');
         }
-        if (!user.fullname || !user.email || !user.password) {
+        if (!user.fullname || !user.email || !user.password !|| !user.nativeLanguage || !user.learningLanguage || !user.location || !user.profilePic) {
             throw new Error('All fields are required');
         }
 
@@ -36,7 +36,11 @@ export class BoardsService {
                 id: updatedUser._id.toString(),
                 fullname: updatedUser.fullname,
                 email: updatedUser.email,
-                image: updatedUser.profilePic
+                image: updatedUser.profilePic,
+                bio: updatedUser.bio,
+                nativeLanguage: updatedUser.nativeLanguage,
+                learningLanguage: updatedUser.learningLanguage,
+                location: updatedUser.location,
             });
             console.log(`User updated successfully ${updatedUser._id}`);
 

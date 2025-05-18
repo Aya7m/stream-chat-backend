@@ -26,6 +26,11 @@ export class SigninService {
         if (!isPasswordValid) {
           throw new Error('Invalid password');
         }
+
+        const indx = Math.floor(Math.random() * 100) + 1;
+        const randomAvatar = `https://avatar.iran.liara.run/public/10/${indx}.png`;
+        userExists.profilePic = randomAvatar;
+        await userExists.save();
     
         const token = this.jwtService.sign(
             { userId: userExists._id, username: userExists.fullname },
