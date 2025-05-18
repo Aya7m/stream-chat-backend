@@ -79,26 +79,31 @@ export class UserControllerService {
     // const savedRequest = await newRequest.save();
     // return savedRequest;
 
+    const senderId = new Types.ObjectId(userId);
+    const receiverId = new Types.ObjectId(friendId);
 
-    if (userId === friendId) {
+
+    if (senderId === receiverId) {
       throw new Error('You cannot send request to yourself');
     }
 
-    const receiver = await this.userModel.findById(friendId);
+    const receiver = await this.userModel.findById(receiverId);
     if (!receiver) {
       throw new Error('Receiver not found');
     }
 
+
+
     // Check if the request already frinds
-    if (receiver.friends.includes(userId)) {
+    if (receiver.friends.includes(senderId)) {
       throw new Error('You are already friends with this user');
     }
 
     // Check if the request already send a request
     const requestExists = await this.frendRequestModel.findOne({
       $or: [
-        { sender: new Types.ObjectId(userId), receiver: new Types.ObjectId(friendId) },
-        { sender: new Types.ObjectId(friendId), receiver: new Types.ObjectId(userId) }
+        { sender: new Types.ObjectId(senderId), receiver: new Types.ObjectId(receiverId) },
+        { sender: new Types.ObjectId(receiverId), receiver: new Types.ObjectId(senderId) }
       ]
     });
 
@@ -109,8 +114,8 @@ export class UserControllerService {
     // create a friend request
 
     const newRequest = new this.frendRequestModel({
-      sender: new Types.ObjectId(userId),
-      receiver: new Types.ObjectId(friendId)
+      sender: new Types.ObjectId(senderId),
+      receiver: new Types.ObjectId(receiverId)
     });
 
     const savedRequest = await newRequest.save();
